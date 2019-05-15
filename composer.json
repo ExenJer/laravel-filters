@@ -1,0 +1,36 @@
+{
+    "name": "exenjer/laravel-filters",
+    "description": "Easy and convenient filters for your Laravel Eloquent application",
+    "keywords": [
+        "laravel",
+        "eloquent",
+        "filter"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ExenJer",
+            "email": "exenjers@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ExenJer\\LaravelFilters\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ExenJer\\LaravelFilters\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.2",
+        "illuminate/console": "5.8.*",
+        "illuminate/pagination": "5.8.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "7"
+    }
+}
