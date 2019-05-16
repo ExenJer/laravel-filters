@@ -25,14 +25,14 @@ abstract class AbstractFilter
     protected $fields = [];
 
     /**
-     * Cast field to the type
+     * Cast field to the type.
      *
      * @var array
      */
     protected $casts = [];
 
     /**
-     * Show with soft deleted
+     * Show with soft deleted.
      *
      * @var bool
      */
@@ -74,7 +74,7 @@ abstract class AbstractFilter
     }
 
     /**
-     * Check all fields
+     * Check all fields.
      *
      * @param array $input
      */
@@ -117,6 +117,17 @@ abstract class AbstractFilter
     protected function defaultFilterCall(string $field, $value): void
     {
         $this()->where($field, $value);
+    }
+
+    /**
+     * Default filter for array values.
+     *
+     * @param string $field
+     * @param array $values
+     */
+    protected function defaultArrayFilterCall(string $field, array $values): void
+    {
+        $this()->whereIn($field, $values);
     }
 
     /**
