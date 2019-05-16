@@ -70,9 +70,14 @@ abstract class AbstractFilter
     {
         $this->fieldsCheck($request);
 
-        return $this->builder->get();
+        return $this()->get();
     }
 
+    /**
+     * Check all fields
+     *
+     * @param array $input
+     */
     private function fieldsCheck(array $input): void
     {
         foreach ($this->fields as $field) {
@@ -82,6 +87,13 @@ abstract class AbstractFilter
         }
     }
 
+    /**
+     * Call special method by field.
+     *
+     * @param string $key Field
+     * @param array $input
+     * @param string|null $value
+     */
     private function caller(string $key, array $input, ?string $value = null): void
     {
         if (! $value) {
