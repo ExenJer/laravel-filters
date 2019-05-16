@@ -32,6 +32,8 @@ abstract class AbstractFilter
     protected $casts = [];
 
     /**
+     * Show with soft deleted
+     *
      * @var bool
      */
     protected $withDeletions = false;
@@ -82,7 +84,7 @@ abstract class AbstractFilter
 
     private function caller(string $key, array $input, ?string $value = null): void
     {
-        if (!$value) {
+        if (! $value) {
             $value = $input[$key];
         }
 
@@ -98,12 +100,11 @@ abstract class AbstractFilter
      *
      * @param string $field
      * @param mixed $value
-     * @return Builder
+     * @return void
      */
-    protected function defaultFilterCall(string $field, $value): Builder
+    protected function defaultFilterCall(string $field, $value)
     {
-        return $this->builder
-            ->where($field, $value);
+        $this()->where($field, $value);
     }
 
     /**
@@ -130,6 +131,19 @@ abstract class AbstractFilter
     private function setUp(): void
     {
         $this->builder = $this->model::query();
+        $this->withTrashed();
+    }
+
+    /**
+     * Show queries with trashed.
+     *
+     * @return void
+     */
+    private function withTrashed(): void
+    {
+        if ($this->withDeletions) {
+            $this()->withTrashed();
+        }
     }
 
     /**
