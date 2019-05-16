@@ -114,25 +114,9 @@ abstract class AbstractFilter
      * @param mixed $value
      * @return void
      */
-    protected function defaultFilterCall(string $field, $value)
+    protected function defaultFilterCall(string $field, $value): void
     {
         $this()->where($field, $value);
-    }
-
-    /**
-     * @return self
-     */
-    protected function getFilter(): self
-    {
-        return $this->filter;
-    }
-
-    /**
-     * @param $filter
-     */
-    protected function setFilter(self $filter): void
-    {
-        $this->filter = $filter;
     }
 
     /**
@@ -143,6 +127,7 @@ abstract class AbstractFilter
     private function setUp(): void
     {
         $this->builder = $this->model::query();
+
         $this->withTrashed();
     }
 
@@ -195,6 +180,22 @@ abstract class AbstractFilter
                     break;
             }
         }
+    }
+
+    /**
+     * @return self
+     */
+    protected function getFilter(): self
+    {
+        return $this->filter;
+    }
+
+    /**
+     * @param $filter
+     */
+    protected function setFilter(self $filter): void
+    {
+        $this->filter = $filter;
     }
 
     /**
