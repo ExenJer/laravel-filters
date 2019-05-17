@@ -4,6 +4,7 @@
 namespace ExenJer\LaravelFilters;
 
 
+use ExenJer\LaravelFilters\Contracts\FilterRole;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -56,12 +57,19 @@ abstract class Filter
     private $filter;
 
     /**
-     * Custom filter handlers.
+     * Additional filter handlers.
      * [name => [filter, arrayFilter]]
      *
      * @var array
      */
     private $filters = [];
+
+    /**
+     * Additional filter handle classes.
+     *
+     * @var FilterRole[]
+     */
+    private $filterClasses = [];
 
     /**
      * AbstractFilter constructor.
@@ -81,6 +89,7 @@ abstract class Filter
     {
         $this->fieldsCheck($request);
         $this->filtersCheck($request);
+        $this->filterClassesCheck($request);
 
         return $this;
     }
@@ -171,6 +180,30 @@ abstract class Filter
                }
 
                $this->defaultArrayFilterCall($name, $value);
+            }
+        }
+    }
+
+    /**
+     * Check all additional filter classes.
+     *
+     * @param array $input
+     * @return void
+     */
+    private function filterClassesCheck(array $input): void
+    {
+        /** @var FilterRole $filterClass */
+        foreach ($this->filterClasses as $name => $filterClass) {
+            if (array_key_exists($name, $input)) {
+                $value = $input[$name];
+
+                if (! is_array($value)) {
+                    $filterClass->handle($value);
+
+                    return;
+                }
+
+                $filterClass->arrayHandle($value);
             }
         }
     }
@@ -320,13 +353,27 @@ abstract class Filter
     }
 
     /**
+     * Add additional filter role.
+     *
      * @param string $name
      * @param callable $handler
      * @param callable|null $arrayHandler
+     * @return void
      */
-    public function addFilter(string $name, callable $handler, ?callable $arrayHandler = null)
+    public function addFilter(string $name, callable $handler, ?callable $arrayHandler = null): void
     {
         $this->filters[$name] = [$handler, $arrayHandler];
+    }
+
+    /**
+     * Add additional filter class.
+     *
+     * @param string $name
+     * @param FilterRole $filter
+     */
+    public function addFilterClass(string $name, FilterRole $filter): void
+    {
+        $this->filterClasses[$name] = $filter;
     }
 
     /**
