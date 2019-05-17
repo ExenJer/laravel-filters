@@ -1,7 +1,7 @@
 # Laravel Eloquent Filter
 Easy and convenient filters for your Laravel Eloquent application
 ## Installation
-Minimum version of PHP **7.2**\
+Minimum version of PHP **7.1**\
 Require this package with composer.
 
 ```
