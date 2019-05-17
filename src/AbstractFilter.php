@@ -55,6 +55,7 @@ abstract class AbstractFilter
 
     /**
      * Custom filter handlers.
+     * [name => [filter, arrayFilter]]
      *
      * @var array
      */
@@ -105,7 +106,7 @@ abstract class AbstractFilter
     {
         /**
          * @var string $name
-         * @var callable $filter
+         * @var callable $filter [0 => all types handler, 2 => array handler]
          */
         foreach ($this->filters as $name => $filter) {
             if (array_key_exists($name, $input)) {
@@ -113,9 +114,18 @@ abstract class AbstractFilter
 
                if (! is_array($value)) {
                    $this->castValueType($name, $value);
+                   $filter[0]($value);
+
+                   return;
                }
 
-               $filter($value);
+               if ($filter[1]) {
+                   $filter[1]($value);
+
+                   return;
+               }
+
+               $this->defaultArrayFilterCall($name, $value);
             }
         }
     }
@@ -139,7 +149,7 @@ abstract class AbstractFilter
             $this->castValueType($key, $value);
         }
 
-        $filterPostfix = $this->generateFilterPostfix($key, $isArrayValue);
+        $filterPostfix = $this->generateFilterPostfix($isArrayValue);
 
         if (method_exists($this->filter, $key . $filterPostfix)) {
             call_user_func([$this->filter, $key . $filterPostfix], $value);
@@ -199,11 +209,10 @@ abstract class AbstractFilter
     /**
      * Generate postfix for filter method.
      *
-     * @param string $field
      * @param bool $isArrayValue
      * @return string
      */
-    private function generateFilterPostfix(string $field, bool $isArrayValue): string
+    private function generateFilterPostfix(bool $isArrayValue): string
     {
         $name = 'Filter';
 
@@ -268,10 +277,11 @@ abstract class AbstractFilter
     /**
      * @param string $name
      * @param callable $handler
+     * @param callable|null $arrayHandler
      */
-    public function addFilter(string $name, callable $handler)
+    public function addFilter(string $name, callable $handler, ?callable $arrayHandler = null)
     {
-        $this->filters[$name] = $handler;
+        $this->filters[$name] = [$handler, $arrayHandler];
     }
 
     /**
