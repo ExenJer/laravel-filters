@@ -72,6 +72,13 @@ abstract class Filter
     private $filterClasses = [];
 
     /**
+     * List of called fields.
+     *
+     * @var array
+     */
+    private $calledFieldStack = [];
+
+    /**
      * AbstractFilter constructor.
      */
     public function __construct()
@@ -87,9 +94,9 @@ abstract class Filter
      */
     protected function apply(array $request): self
     {
-        $this->fieldsCheck($request);
-        $this->filtersCheck($request);
-        $this->filterClassesCheck($request);
+        $this->checks($request);
+
+        $this->callDefaultMethods($request);
 
         return $this;
     }
@@ -138,6 +145,19 @@ abstract class Filter
     }
 
     /**
+     * Call all checks methods.
+     *
+     * @param array $request
+     * @return void
+     */
+    private function checks(array $request): void
+    {
+        $this->fieldsCheck($request);
+        $this->filtersCheck($request);
+        $this->filterClassesCheck($request);
+    }
+
+    /**
      * Check all fields.
      *
      * @param array $input
@@ -169,17 +189,17 @@ abstract class Filter
                if (! is_array($value)) {
                    $this->castValueType($name, $value);
                    $filter[0]($value);
+                   array_push($this->calledFieldStack, $name);
 
                    return;
                }
 
                if ($filter[1]) {
                    $filter[1]($value);
+                   array_push($this->calledFieldStack, $name);
 
                    return;
                }
-
-               $this->defaultArrayFilterCall($name, $value);
             }
         }
     }
@@ -196,14 +216,15 @@ abstract class Filter
         foreach ($this->filterClasses as $name => $filterClass) {
             if (array_key_exists($name, $input)) {
                 $value = $input[$name];
-
                 if (! is_array($value)) {
-                    $filterClass->handle($value);
+                    $filterClass->handle($value, $this->builder);
+                    array_push($this->calledFieldStack, $name);
 
                     return;
                 }
 
-                $filterClass->arrayHandle($value);
+                $filterClass->arrayHandle($value, $this->builder);
+                array_push($this->calledFieldStack, $name);
             }
         }
     }
@@ -231,9 +252,22 @@ abstract class Filter
 
         if (method_exists($this->filter, $key . $filterPostfix)) {
             call_user_func([$this->filter, $key . $filterPostfix], $value);
-        } else {
-            $isArrayValue ? $this->defaultArrayFilterCall($key, $value)
-                : $this->defaultFilterCall($key, $value);
+            array_push($this->calledFieldStack, $key);
+        }
+    }
+
+    /**
+     * Call default method if field not be called before.
+     *
+     * @param array $input
+     */
+    private function callDefaultMethods(array $input)
+    {
+        foreach ($input as $key => $value) {
+            if (! in_array($key, $this->calledFieldStack)) {
+                (is_array($value)) ? $this->defaultArrayFilterCall($key, $value)
+                    : $this->defaultFilterCall($key, $value);
+            }
         }
     }
 
