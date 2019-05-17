@@ -4,7 +4,7 @@
 namespace ExenJer\LaravelFilters;
 
 
-use ExenJer\LaravelFilters\Contracts\FilterRole;
+use ExenJer\LaravelFilters\Contracts\FilterRule;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -67,7 +67,7 @@ abstract class Filter
     /**
      * Additional filter handle classes.
      *
-     * @var FilterRole[]
+     * @var FilterRule[]
      */
     private $filterClasses = [];
 
@@ -192,7 +192,7 @@ abstract class Filter
      */
     private function filterClassesCheck(array $input): void
     {
-        /** @var FilterRole $filterClass */
+        /** @var FilterRule $filterClass */
         foreach ($this->filterClasses as $name => $filterClass) {
             if (array_key_exists($name, $input)) {
                 $value = $input[$name];
@@ -353,7 +353,7 @@ abstract class Filter
     }
 
     /**
-     * Add additional filter role.
+     * Add additional filter rule.
      *
      * @param string $name
      * @param callable $handler
@@ -369,9 +369,9 @@ abstract class Filter
      * Add additional filter class.
      *
      * @param string $name
-     * @param FilterRole $filter
+     * @param FilterRule $filter
      */
-    public function addFilterClass(string $name, FilterRole $filter): void
+    public function addFilterClass(string $name, FilterRule $filter): void
     {
         $this->filterClasses[$name] = $filter;
     }

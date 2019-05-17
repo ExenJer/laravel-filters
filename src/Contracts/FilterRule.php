@@ -4,7 +4,7 @@
 namespace ExenJer\LaravelFilters\Contracts;
 
 
-interface FilterRole
+interface FilterRule
 {
     /**
      * Handle all request values except array.
