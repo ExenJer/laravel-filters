@@ -105,11 +105,12 @@ class UserFilter extends Filter
 ```
 Yes, in order to gain access to the Builder, you need to refer to `$this()`
 ### Additional configuration
+#### With trashed
 For using all filters `withTrashed`, set true for `$withDeletions` property:
 ```php
 protected $withDeletions = true;
 ```
-
+#### Casts
 Also, you can cast a value for the resulting values via `$casts` property:
 
 > **Note:** Supported types: int (integer), bool (boolean), float, double, real, array, object.
