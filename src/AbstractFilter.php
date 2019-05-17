@@ -26,6 +26,7 @@ abstract class AbstractFilter
 
     /**
      * Cast field to the type.
+     * int (integer), bool (boolean), float, double, real, array, object.
      *
      * @var array
      */
@@ -100,11 +101,20 @@ abstract class AbstractFilter
             $value = $input[$key];
         }
 
-        $this->castValueType($key, $value);
+        $isArrayValue = is_array($value);
 
-        method_exists($this->filter, $key . 'Filter') ?
-            call_user_func([$this->filter, $key . 'Filter'], $value)
-            : $this->defaultFilterCall($key, $value);
+        if (! $isArrayValue) {
+            $this->castValueType($key, $value);
+        }
+
+        $filterPostfix = $this->generateFilterPostfix($key, $isArrayValue);
+
+        if (method_exists($this->filter, $key . $filterPostfix)) {
+            call_user_func([$this->filter, $key . $filterPostfix], $value);
+        } else {
+            $isArrayValue ? $this->defaultArrayFilterCall($key, $value)
+                : $this->defaultFilterCall($key, $value);
+        }
     }
 
     /**
@@ -152,6 +162,13 @@ abstract class AbstractFilter
         if ($this->withDeletions) {
             $this()->withTrashed();
         }
+    }
+
+    private function generateFilterPostfix(string $field, bool $isArrayValue): string
+    {
+        $name = 'Filter';
+
+        return ($isArrayValue) ? 'Array' . $name : $name;
     }
 
     /**
