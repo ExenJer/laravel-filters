@@ -54,6 +54,13 @@ abstract class AbstractFilter
     private $filter;
 
     /**
+     * Custom filter handlers.
+     *
+     * @var array
+     */
+    private $filters = [];
+
+    /**
      * AbstractFilter constructor.
      */
     public function __construct()
@@ -70,6 +77,7 @@ abstract class AbstractFilter
     protected function apply(array $request): Collection
     {
         $this->fieldsCheck($request);
+        $this->filtersCheck($request);
 
         return $this()->get();
     }
@@ -84,6 +92,30 @@ abstract class AbstractFilter
         foreach ($this->fields as $field) {
             if (array_key_exists($field, $input)) {
                 $this->caller($field, $input);
+            }
+        }
+    }
+
+    /**
+     * Check all additional filters.
+     *
+     * @param array $input
+     */
+    private function filtersCheck(array $input): void
+    {
+        /**
+         * @var string $name
+         * @var callable $filter
+         */
+        foreach ($this->filters as $name => $filter) {
+            if (array_key_exists($name, $input)) {
+                $value = $input[$name];
+
+               if (! is_array($value)) {
+                   $this->castValueType($name, $value);
+               }
+
+               $filter($value);
             }
         }
     }
@@ -164,6 +196,13 @@ abstract class AbstractFilter
         }
     }
 
+    /**
+     * Generate postfix for filter method.
+     *
+     * @param string $field
+     * @param bool $isArrayValue
+     * @return string
+     */
     private function generateFilterPostfix(string $field, bool $isArrayValue): string
     {
         $name = 'Filter';
@@ -224,6 +263,15 @@ abstract class AbstractFilter
     protected function setFilter(self $filter): void
     {
         $this->filter = $filter;
+    }
+
+    /**
+     * @param string $name
+     * @param callable $handler
+     */
+    public function addFilter(string $name, callable $handler)
+    {
+        $this->filters[$name] = $handler;
     }
 
     /**
