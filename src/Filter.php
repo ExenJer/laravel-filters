@@ -4,11 +4,13 @@
 namespace ExenJer\LaravelFilters;
 
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-abstract class AbstractFilter
+abstract class Filter
 {
     /**
      * Current model.
@@ -73,14 +75,57 @@ abstract class AbstractFilter
      * Main process of filtering.
      *
      * @param array $request Array of request key - values
-     * @return Collection
+     * @return self
      */
-    protected function apply(array $request): Collection
+    protected function apply(array $request): self
     {
         $this->fieldsCheck($request);
         $this->filtersCheck($request);
 
-        return $this()->get();
+        return $this;
+    }
+
+    /**
+     * @param array $columns
+     * @return Collection
+     */
+    public function get(array $columns = ['*']): Collection
+    {
+        return $this()->get($columns);
+    }
+
+    /**
+     * @param int|null $perPage
+     * @param array $columns
+     * @param string $pageName
+     * @param int|null $page
+     * @return LengthAwarePaginator
+     */
+    public function paginate(
+        ?int $perPage = null,
+        array $columns = ['*'],
+        string $pageName = 'page',
+        ?int $page = null
+    ): LengthAwarePaginator
+    {
+        return $this()->paginate($perPage, $columns, $pageName, $page);
+    }
+
+    /**
+     * @param int|null $perPage
+     * @param array $columns
+     * @param string $pageName
+     * @param int|null $page
+     * @return Paginator
+     */
+    public function simplePaginate(
+        ?int $perPage = null,
+        array $columns = ['*'],
+        string $pageName = 'page',
+        ?int $page = null
+    ): Paginator
+    {
+        return $this()->simplePaginate($perPage, $columns, $pageName, $page);
     }
 
     /**

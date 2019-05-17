@@ -27,7 +27,6 @@
     "prefer-stable": true,
     "require": {
         "php": "^7.2",
-        "illuminate/console": "5.8.*",
         "illuminate/pagination": "5.8.*",
         "illuminate/database": "5.8.*"
     },
