@@ -24,5 +24,5 @@ interface FilterRule
      * @param Builder $builder
      * @return void
      */
-    public function arrayHandle(array $values, Builder $builder): void;
+    public function handleArray(array $values, Builder $builder): void;
 }
