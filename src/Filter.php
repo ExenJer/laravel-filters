@@ -76,7 +76,7 @@ abstract class Filter
      *
      * @var array
      */
-    private $calledFieldStack = [];
+    private $calledFieldList = [];
 
     /**
      * AbstractFilter constructor.
@@ -161,6 +161,7 @@ abstract class Filter
      * Check all fields.
      *
      * @param array $input
+     * @return void
      */
     private function fieldsCheck(array $input): void
     {
@@ -175,6 +176,7 @@ abstract class Filter
      * Check all additional filters.
      *
      * @param array $input
+     * @return void
      */
     private function filtersCheck(array $input): void
     {
@@ -189,14 +191,14 @@ abstract class Filter
                if (! is_array($value)) {
                    $this->castValueType($name, $value);
                    $filter[0]($value);
-                   array_push($this->calledFieldStack, $name);
+                   array_push($this->calledFieldList, $name);
 
                    return;
                }
 
                if ($filter[1]) {
                    $filter[1]($value);
-                   array_push($this->calledFieldStack, $name);
+                   array_push($this->calledFieldList, $name);
 
                    return;
                }
@@ -218,13 +220,13 @@ abstract class Filter
                 $value = $input[$name];
                 if (! is_array($value)) {
                     $filterClass->handle($value, $this->builder);
-                    array_push($this->calledFieldStack, $name);
+                    array_push($this->calledFieldList, $name);
 
                     return;
                 }
 
                 $filterClass->arrayHandle($value, $this->builder);
-                array_push($this->calledFieldStack, $name);
+                array_push($this->calledFieldList, $name);
             }
         }
     }
@@ -235,6 +237,7 @@ abstract class Filter
      * @param string $key Field
      * @param array $input
      * @param string|null $value
+     * @return void
      */
     private function caller(string $key, array $input, ?string $value = null): void
     {
@@ -252,19 +255,20 @@ abstract class Filter
 
         if (method_exists($this->filter, $key . $filterPostfix)) {
             call_user_func([$this->filter, $key . $filterPostfix], $value);
-            array_push($this->calledFieldStack, $key);
+            array_push($this->calledFieldList, $key);
         }
     }
 
     /**
-     * Call default method if field not be called before.
+     * Call default method if field was not previously called.
      *
      * @param array $input
+     * @return void
      */
-    private function callDefaultMethods(array $input)
+    private function callDefaultMethods(array $input): void
     {
         foreach ($input as $key => $value) {
-            if (! in_array($key, $this->calledFieldStack)) {
+            if (! in_array($key, $this->calledFieldList)) {
                 (is_array($value)) ? $this->defaultArrayFilterCall($key, $value)
                     : $this->defaultFilterCall($key, $value);
             }
@@ -288,6 +292,7 @@ abstract class Filter
      *
      * @param string $field
      * @param array $values
+     * @return void
      */
     protected function defaultArrayFilterCall(string $field, array $values): void
     {
@@ -336,6 +341,7 @@ abstract class Filter
      *
      * @param string $field
      * @param $value
+     * @return void
      */
     private function castValueType(string $field, &$value): void
     {
