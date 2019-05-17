@@ -112,6 +112,8 @@ protected $withDeletions = true;
 
 Also, you can cast a value for the resulting values via `$casts` property:
 
+> **Note:** Supported types: int (integer), bool (boolean), float, double, real, array, object.
+
 > Does not work when getting an array
 ```php
 protected $casts = [
@@ -123,7 +125,7 @@ You can dynamically add filters in two ways:
 1. Using the method `addFilter()`
 2. Using the interface `FilterRule` and method `addFilterClass()`
 
-An example implementation of the first method (in UserFilter context):
+An example implementation of the first method *(in UserFilter context)*:
 ```php
 $this->addFilter('name', function (string $name): void {
     $this()->where('name', $name);
@@ -135,16 +137,59 @@ The implementation of the second method:
 
 Create a class and implement `FilterRule` interface
 ```php
-class Test2UserFilterRule implements FilterRule
+class UserNameRuleFilter implements FilterRule
 {
     public function handle($value, Builder $builder): void
     {
         $builder->where('name', $value);
     }
  
-    public function arrayHandle(array $values): void
+    public function handleArray(array $values, Builder $builder): void
     {
-        $this()->whereIn('name', $values);
+        $builder->whereIn('name', $values);
     }
 }
 ```
+Add the class from `UserFilter` instance using the `addFilterClass()` method
+```php
+$userFilter->addFilterClass('name', new UserNameRuleFilter());
+```
+#### Default filters
+If you have not written filters for a specific field, then the default data handling methods will be called
+
+Their default implementation:
+```php
+protected function defaultFilterCall(string $field, $value): void
+{
+    $this()->where($field, $value);
+}
+
+protected function defaultArrayFilterCall(string $field, array $values): void
+{
+    $this()->whereIn($field, $values);
+}
+```
+You can override them in your filter
+```php
+class UserFilter extends Filter
+{
+    use DefaultFilterSetUp;
+    
+    protected $model = User::class;
+    
+    protected $fields = ['name', 'age'];
+    
+    protected function defaultFilterCall(string $field, $value): void
+    {
+        // Some logic...
+    }
+    
+    protected function defaultArrayFilterCall(string $field, array $values): void
+    {
+        // Some logic...
+    }
+}
+```
+
+### Thank you
+Any pull requests and suggestions are welcome!
