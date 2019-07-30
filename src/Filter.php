@@ -28,6 +28,13 @@ abstract class Filter
     protected $fields = [];
 
     /**
+     * Request fields that need to ignore
+     *
+     * @var array
+     */
+    protected $exclude = [];
+
+    /**
      * Cast field to the type.
      * int (integer), bool (boolean), float, double, real, array, object.
      *
@@ -284,7 +291,8 @@ abstract class Filter
      */
     protected function defaultFilterCall(string $field, $value): void
     {
-        $this()->where($field, $value);
+        if(!in_array($field, $this->exclude))
+            $this()->where($field, $value);
     }
 
     /**
