@@ -52,8 +52,6 @@ abstract class Filter
 
     /**
      * Model with custom query.
-     *
-     * @var Builder
      */
     private $modelBuilder = null;
 
@@ -411,18 +409,18 @@ abstract class Filter
     }
 
     /**
-     * @return Builder
+     * @return mixed
      */
-    public function getModelBuilder(): Builder
+    public function getModelBuilder()
     {
         return $this->modelBuilder;
     }
 
     /**
-     * @param Builder $modelBuilder
+     * @param mixed $modelBuilder
      * @return Filter
      */
-    public function setModelBuilder(Builder $modelBuilder): self
+    public function setModelBuilder($modelBuilder): self
     {
         $this->modelBuilder = $modelBuilder;
 
