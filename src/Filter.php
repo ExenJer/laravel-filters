@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 abstract class Filter
 {
@@ -48,6 +49,13 @@ abstract class Filter
      * @var Builder
      */
     private $builder;
+
+    /**
+     * Model with custom query.
+     *
+     * @var Builder
+     */
+    private $modelBuilder = null;
 
     /**
      * Current filter class.
@@ -94,6 +102,10 @@ abstract class Filter
      */
     protected function apply(array $request): self
     {
+        if ($this->modelBuilder) {
+            $this->builder = $this->modelBuilder;
+        }
+
         $this->checks($request);
 
         $this->callDefaultMethods($request);
@@ -253,8 +265,14 @@ abstract class Filter
 
         $filterPostfix = $this->generateFilterPostfix($isArrayValue);
 
-        if (method_exists($this->filter, $key . $filterPostfix)) {
-            call_user_func([$this->filter, $key . $filterPostfix], $value);
+        $methodName = Str::camel($key) . $filterPostfix;
+        $objectFilterName = $this->filter;
+
+        if (method_exists($objectFilterName, $methodName)) {
+            call_user_func([
+                $objectFilterName,
+                $methodName
+            ], $value);
             array_push($this->calledFieldList, $key);
         }
     }
@@ -390,6 +408,25 @@ abstract class Filter
     protected function setFilter(self $filter): void
     {
         $this->filter = $filter;
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getModelBuilder(): Builder
+    {
+        return $this->modelBuilder;
+    }
+
+    /**
+     * @param Builder $modelBuilder
+     * @return Filter
+     */
+    public function setModelBuilder(Builder $modelBuilder): self
+    {
+        $this->modelBuilder = $modelBuilder;
+
+        return $this;
     }
 
     /**
