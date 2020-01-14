@@ -12,17 +12,17 @@ interface FilterRule
      * Handle all request values except array.
      *
      * @param mixed $value
-     * @param Builder $builder
+     * @param mixed $builder
      * @return void
      */
-    public function handle($value, Builder $builder): void;
+    public function handle($value, $builder): void;
 
     /**
      * Handle arrays.
      *
      * @param array $values
-     * @param Builder $builder
+     * @param mixed $builder
      * @return void
      */
-    public function handleArray(array $values, Builder $builder): void;
+    public function handleArray(array $values, $builder): void;
 }

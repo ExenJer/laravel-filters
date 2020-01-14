@@ -45,8 +45,6 @@ abstract class Filter
 
     /**
      * Current query builder for the model.
-     *
-     * @var Builder
      */
     private $builder;
 
@@ -451,10 +449,7 @@ abstract class Filter
         $this->filterClasses[$name] = $filter;
     }
 
-    /**
-     * @return Builder
-     */
-    public function __invoke(): Builder
+    public function __invoke()
     {
         return $this->builder;
     }
