@@ -9,7 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 abstract class Filter
@@ -27,6 +26,13 @@ abstract class Filter
      * @var array
      */
     protected $fields = [];
+
+    /**
+     * Request fields that need to ignore
+     *
+     * @var array
+     */
+    protected $exclude = [];
 
     /**
      * Cast field to the type.
@@ -282,6 +288,11 @@ abstract class Filter
     private function callDefaultMethods(array $input): void
     {
         foreach ($input as $key => $value) {
+            // If field exclude.
+            if (in_array($key, $this->exclude)) {
+                continue;
+            }
+
             if (! in_array($key, $this->calledFieldList)) {
                 (is_array($value)) ? $this->defaultArrayFilterCall($key, $value)
                     : $this->defaultFilterCall($key, $value);
