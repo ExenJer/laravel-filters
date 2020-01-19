@@ -1,7 +1,7 @@
 # Laravel Eloquent Filter
-Easy and convenient filters for your Laravel Eloquent application
+Easy and convenient filters for your **Laravel Eloquent** application
 ## Installation
-Minimum version of PHP **7.1**\
+Minimum **php** version to use the package: **7.1**\
 Require this package with composer.
 
 ```
@@ -82,6 +82,8 @@ The following scheme is used for writing filters: Create a method with the follo
 values except array and **'fieldName' + 'ArrayFilter'** for handle arrays.
 >You may not create methods to filter specific fields. Then the standard methods will be called, details of which are written below.
 
+>In the case of using snake_case (e.g. price_from), the name of the method must be in camelCase (priceFromFilter).
+
 *Example*:
 ```php
 class UserFilter extends Filter
@@ -90,7 +92,7 @@ class UserFilter extends Filter
     
     protected $model = User::class;
     
-    protected $fields = ['name', 'age'];
+    protected $fields = ['name', 'age', 'age_from'];
     
     protected function nameFilter(string $value): void
     {
@@ -101,10 +103,21 @@ class UserFilter extends Filter
     {
         $this()->whereIn('name', $value);
     }
+
+    protected function ageFromFilter(string $value): void 
+    {
+        $this()->where('age', '>=', $value);
+    }
 }
 ```
 Yes, in order to gain access to the Builder, you need to refer to `$this()`
 ### Additional configuration
+#### Exclude specific fields
+In order to exclude the triggering of standard filters for specific fields from the query, use the array `$exclude`
+```php
+protected $exclude = ['id', 'email'];
+```
+
 #### With trashed
 For using all filters `withTrashed`, set true for `$withDeletions` property:
 ```php
@@ -120,6 +133,18 @@ Also, you can cast a value for the resulting values via `$casts` property:
 protected $casts = [
     'age' => 'int'
 ];
+```
+#### Custom builder
+If you need to use filtering with predefined eloquent parameters, you can use the `setModelBuilder` function
+```php
+public function index(Request $request, UserFilter $userFilter)
+{
+    $modelBuilder = User::where(...)->with(...);
+
+    $users = $userFilter->setModelBuilder($modelBuilder)
+        ->filter($request->all())
+        ->get();
+}
 ```
 #### Dynamic filters
 You can dynamically add filters in two ways:
